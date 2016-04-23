@@ -9,8 +9,10 @@ import java.util.Random;
  * Created by romcheG1 on 12.04.2016.
  */
 public class Tile {
-    // BufferedImage image = new BufferedImage(tileX,tileY,);
-    int tileX, tileY;
+    // BufferedImage image = new BufferedImage(tileXleft,tileYup,);
+    int tileXleft, tileYup;
+    int tileXright, tileYdown;
+
     Image grass = new ImageIcon("assets\\tile-grass.png").getImage();
 
     Image ground2 = new ImageIcon("assets\\tile-earth2.png").getImage();
@@ -28,5 +30,10 @@ public class Tile {
         else
             return ground2;
     }
+
+    public int getTileXright(){return tileXleft+16;}
+    public int getTileXleft(){return tileXleft;}
+    public int getTileYup(){return tileYup;}
+    public int getTileYdown(){return tileYup+16;}
 
 }

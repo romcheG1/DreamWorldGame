@@ -5,11 +5,12 @@ import java.io.FileReader;
 import java.util.ArrayList;
 
 public class Render extends JPanel {
+    Physics physics = new Physics();
     Image sky = new ImageIcon("assets\\sky.png").getImage();
-    Image player = new ImageIcon("assets\\kek.png").getImage();
+    Image player = new ImageIcon("assets\\player.png").getImage();
      ArrayList<Tile> tileArray = new ArrayList<>();
     int tileArrayIndex = 0;
-    static int x = 0, y = 200;  //позиція плеєра
+    static int x = 0, y = 180;  //позиція плеєра
     int fallingSpeed =3 ;
     static boolean isOnGround = false;
     public void falling() {
@@ -19,30 +20,11 @@ public class Render extends JPanel {
             y += fallingSpeed / 5;
             fallingSpeed++;
         }
-
     }
 
-
-
-
     public void changePlayerPos(int dx, int dy) {
-
-
-
         x += dx;
         y += dy;
-
-
-
-
-//        for (int i = 0; tileArray.get(i).tileX < 800; i++) {
-//            if (x >= tileArray.get(i).tileX && x <= tileArray.get(i).tileX + 15)
-//                System.out.println(i);
-////            for (int j = 0; j < tileArray.size(); i++) {
-////                if(y>=tileArray.get(i).tileX&&x<=tileArray.get(i).tileX+15)
-////
-////            }
-//        }
     }
 
     public void readTxt() {
@@ -77,8 +59,8 @@ public class Render extends JPanel {
 
                     Tile bufferTile = new Tile();
                     bufferTile.tileType = bufferTile.grass;
-                    bufferTile.tileX = StepX;
-                    bufferTile.tileY = StepY;
+                    bufferTile.tileXleft = StepX;
+                    bufferTile.tileYup = StepY;
 
                     tileArray.add(tileArrayIndex, bufferTile);
 
@@ -87,12 +69,12 @@ public class Render extends JPanel {
                 }
                 if (t == 51)//3
                 {
-                    Tile buffer = new Tile();
-                    buffer.tileType = buffer.getGround();
-                    buffer.tileX = StepX;
-                    buffer.tileY = StepY;
+                    Tile bufferTile = new Tile();
+                    bufferTile.tileType = bufferTile.getGround();
+                    bufferTile.tileXleft = StepX;
+                    bufferTile.tileYup = StepY;
 
-                    tileArray.add(tileArrayIndex, buffer);
+                    tileArray.add(tileArrayIndex, bufferTile);
 
                     StepX = StepX + tile.SizeOfTile;
                     tileArrayIndex++;
@@ -115,28 +97,30 @@ public class Render extends JPanel {
 public void correctPlayer() {
 
     for (int i = 0; i < getTileArray().size(); i++) {
-        if (getTileArray().get(i).tileY - getPlayerY() < 370 && getTileArray().get(i).tileY - getPlayerY() > 1 &&
-                getTileArray().get(i).tileX > x - 16 && getTileArray().get(i).tileX < x + 20) {
-            y = y - (370 - (getTileArray().get(i).tileY - getPlayerY()));
+        if (getPlayerYdown() > getTileArray().get(i).getTileYup() && getPlayerYdown() < getTileArray().get(i).getTileYdown() + 1 &&
+                getPlayerXleft() < getTileArray().get(i).getTileXright() && getPlayerXright() > getTileArray().get(i).getTileXleft()) {
+            y -= getPlayerYdown() - getTileArray().get(i).getTileYup();
             isOnGround = true;
-            //System.out.println("igrokY:" + getPlayerY() + "      " + "TileY:" + getTileArray().get(i).tileY);
             break;
         } else {
             isOnGround = false;
         }
-        if (getPlayerX() + 20 > getTileArray().get(i).tileX && getPlayerX() + 20 < getTileArray().get(i).tileX + 16 &&      //перевірка стєнки зправа
-                getPlayerY() > getTileArray().get(i).tileY - 2 && getPlayerY() < getTileArray().get(i).tileY + 16) {
-            System.out.println(x);
-            x = x -(20-(getTileArray().get(i).tileX - getPlayerX()));
+        if (getPlayerXright() > getTileArray().get(i).getTileXleft() && getPlayerXleft() + 20 < getTileArray().get(i).getTileXleft() + 16 &&      //перевірка стєнки зправа
+                getPlayerYup() > getTileArray().get(i).getTileYup() - 2 && getPlayerYup() < getTileArray().get(i).getTileYup() + 16) {
+            x = x - (20 - (getTileArray().get(i).getTileXleft() - getPlayerXleft()));
         }
-        if(getPlayerX() < getTileArray().get(i).tileX +16 && getPlayerX() > getTileArray().get(i).tileX + 16 &&  //зліва
-                        getPlayerY() > getTileArray().get(i).tileY - 2 && getPlayerY() < getTileArray().get(i).tileY + 16){
-
+        if (getPlayerXleft() < getTileArray().get(i).getTileXleft() + 16 && getPlayerXleft() > getTileArray().get(i).getTileXleft() &&  //зліва
+                getPlayerYup() + 1 < getTileArray().get(i).getTileYup() + 16 && getPlayerYup() + 1 > getTileArray().get(i).getTileYup()) {
+            x = x + (getTileArray().get(i).getTileXleft() + 16 - getPlayerXleft());
         }
     }
 }
-    public int getPlayerX(){return x;}
-    public int getPlayerY(){return y;}
+    public int getPlayerXleft(){return x;}
+    public int getPlayerXright() {
+        return x + player.getWidth(this);
+    }
+    public int getPlayerYup(){return y;}
+    public int getPlayerYdown(){return y + player.getHeight(this);}
 
      /*koku tut zakonchil =)))*/
 
@@ -144,9 +128,14 @@ public void correctPlayer() {
         g.drawImage(sky, 0, 0, this);
 
         for (int i = 0; i < tileArray.size(); i++) {
-            g.drawImage(tileArray.get(i).tileType, tileArray.get(i).tileX, tileArray.get(i).tileY, null);
+            g.drawImage(tileArray.get(i).tileType, tileArray.get(i).tileXleft, tileArray.get(i).tileYup, null);
         }
 
         g.drawImage(player, x, y, null);
+
+        g.drawString("Xl " + getPlayerXleft(), 10, 10);
+        g.drawString("Yu " + getPlayerYup(), 10, 20);
     }
+
 }
+
